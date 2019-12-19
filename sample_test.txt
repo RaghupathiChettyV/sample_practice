@@ -1,0 +1,18 @@
+$list_count = $MyInList.count
+Write-Output " Total open Tickets: $list_count" >> $jobLogFile
+## get the first digit of the repo server, which identifies region, 5 for canada, 2 for west and 0 for east
+$locCode = $env:computername.substring(0,1)
+$subCode = $env:computername.substring(0,2)
+For ($j=0; $j -le $list_count - 1 ; $j++ )
+    {
+        $listtojson = $MyInList[$j] | ConvertTo-Json
+        $converttojson = $listtojson | ConvertFrom-Json
+        $converttojson1 = $converttojson | ConvertFrom-Json
+        if($converttojson1.policy_name -eq "PSSIS OpsAlert 1")
+        {
+            $finalserver = $converttojson1.entity.name
+			# Write-Output " Evaluating ticket for $finalserver" >> $jobLogFile
+			# The like string matches any production SIS DB servers in the region with a J Drive Alert from NewRelic
+            if ($finalserver -like "$locCode*SISP1ODBW*(J:)*")
+            #if ($finalserver -like '*SISP*(J:)*')
+            {
